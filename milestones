@@ -1,0 +1,76 @@
+Week 1 — Project Setup
+
+DONE Define core features & scope
+DONE Set up repository & project structure
+DOING Create basic wireframes
+
+Week 2 — Authentication
+
+DOING Implement signup/login
+Google account link. 
+User profile basics
+
+Week 3 — Groups
+
+Create/join/leave groups
+Shareable invitation links
+
+Week 4 — Group Management
+
+Admin permissions
+Member management UI
+
+Week 5 — Progress Modules (Setup)
+
+Admin creates tracking modules
+Module types defined
+
+Week 6 — Progress Modules (Functionality)
+
+CRUD operations for modules
+Members interact with modules
+
+Week 7 — Progress Tracking
+
+Users submit progress
+Store/display progress entries
+
+Week 8 — Group Activity Feed
+
+Show updates/logs
+Basic notifications (optional)
+
+Week 9 — Visualizations
+
+Charts for group/individual progress
+Summary dashboard
+
+Week 10 — Achievement Badges
+
+Badge rules (streaks/milestones)
+Badge display UI
+
+Week 11 — UI/UX Improvements
+
+Styling and layout polish
+Mobile responsiveness
+
+Week 12 — Testing
+
+Unit & integration tests
+Fix major bugs
+
+Week 13 — Deployment
+
+Deploy backend & frontend
+Configure environment variables
+
+Week 14 — Documentation
+
+API docs
+User guide & developer notes
+
+Week 15 — Final Presentation
+
+Demo preparation
+Final slides & walkthrough
