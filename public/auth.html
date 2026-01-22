@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Auth – Signup & Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    form {
+      border: 1px solid #ccc;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success {
+      background-color: #e6ffed;
+      border: 1px solid #34a853;
+      color: #185a2a;
+    }
+    .error {
+      background-color: #ffecec;
+      border: 1px solid #ea4335;
+      color: #8b1a18;
+    }
+    #current-user {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Account</h1>
+
+  <h2>Sign Up</h2>
+  <form id="signup-form">
+    <label for="signup-username">Username</label>
+    <input type="text" id="signup-username" required />
+
+    <label for="signup-password">Password</label>
+    <input type="password" id="signup-password" required />
+
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <h2>Log In</h2>
+  <form id="login-form">
+    <label for="login-username">Username</label>
+    <input type="text" id="login-username" required />
+
+    <label for="login-password">Password</label>
+    <input type="password" id="login-password" required />
+
+    <button type="submit">Log In</button>
+  </form>
+
+  <div id="status"></div>
+  <div id="current-user"></div>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+
+    const signupForm = document.getElementById("signup-form");
+    const loginForm = document.getElementById("login-form");
+    const statusDiv = document.getElementById("status");
+    const currentUserDiv = document.getElementById("current-user");
+
+    let currentUser = null; // store the logged-in user in memory
+
+    function setStatus(message, isError = false) {
+      statusDiv.textContent = message;
+      statusDiv.className = "";
+      if (!message) return;
+      statusDiv.classList.add(isError ? "error" : "success");
+    }
+
+    function updateCurrentUser() {
+      if (!currentUser) {
+        currentUserDiv.textContent = "Not logged in.";
+      } else {
+        currentUserDiv.textContent = `Logged in as: ${currentUser.username} (id: ${currentUser.id})`;
+      }
+    }
+
+    // Handle signup
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("signup-username").value.trim();
+      const password = document.getElementById("signup-password").value.trim();
+
+      if (!username || !password) return;
+
+      try {
+        const res = await fetch(API_BASE + "/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setStatus(data.message || "Signup failed", true);
+          return;
+        }
+
+        setStatus("Signup successful!", false);
+        currentUser = data.user;
+        updateCurrentUser();
+        signupForm.reset();
+      } catch (err) {
+        console.error(err);
+        setStatus("Error connecting to server", true);
+      }
+    });
+
+    // Handle login
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("login-username").value.trim();
+      const password = document.getElementById("login-password").value.trim();
+
+      if (!username || !password) return;
+
+      try {
+        const res = await fetch(API_BASE + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setStatus(data.message || "Login failed", true);
+          return;
+        }
+
+        setStatus("Login successful!", false);
+        localStorage.setItem("currentUser", JSON.stringify(data.user));
+        //Redirect to index.html after login
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error(err);
+        setStatus("Error connecting to server", true);
+      }
+    });
+
+    // Initial state
+    updateCurrentUser();
+  </script>
+</body>
+</html>

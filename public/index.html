@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Group Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .group {
+      border: 1px solid #ccc;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .group-id {
+      font-size: 12px;
+      color: #666;
+    }
+    #logout {
+      background: #d9534f;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Dashboard</h1>
+
+  <button id="logout">Log Out</button>
+
+  <form id="group-form">
+    <input type="text" id="group-name" placeholder="Enter group name" required />
+    <input type="text" id="tracking-type" placeholder="What are you tracking?" required />
+    <button type="submit">Create Group</button>
+  </form>
+
+  <h2>Groups You Belong To</h2>
+  <div id="groups-container"></div>
+
+  <script>
+    const API_BASE = "http://localhost:3000";
+
+    // Get logged-in user
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    // If not logged in send to login page
+    if (!currentUser) {
+      window.location.href = "auth.html";
+    }
+
+    const form = document.getElementById("group-form");
+    const nameInput = document.getElementById("group-name");
+    const trackingInput = document.getElementById("tracking-type");
+    const groupsContainer = document.getElementById("groups-container");
+    const logoutBtn = document.getElementById("logout");
+
+    // Logout
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("currentUser");
+      window.location.href = "auth.html";
+    });
+
+    // Load only users groups
+    async function loadGroups() {
+      const res = await fetch(API_BASE + "/groups");
+      const allGroups = await res.json();
+
+      // Filter groups where the user is a member
+      const userGroups = allGroups.filter(g =>
+        g.members.includes(currentUser.id)
+      );
+
+      groupsContainer.innerHTML = "";
+
+      if (userGroups.length === 0) {
+        groupsContainer.innerHTML = "<p>You are not in any groups yet.</p>";
+        return;
+      }
+
+      userGroups.forEach(group => {
+        const div = document.createElement("div");
+        div.className = "group";
+        div.innerHTML = `
+          <a href= "group.html?groupId=${group.id}">
+          <strong>${group.name}</strong>
+            </a><br>
+        Tracking: <em>${group.tracking}</em><br>
+        <div class="group-id">Group ID: ${group.id}</div>
+        <div>Invite Link: http://localhost:3000/join/${group.inviteCode}</div> 
+        `;
+        groupsContainer.appendChild(div);
+      });
+    }
+
+    // Create a group 
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = nameInput.value.trim();
+      const tracking = trackingInput.value.trim();
+
+      if (!name || !tracking) return;
+
+      await fetch(API_BASE + "/groups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          tracking,
+          userId: currentUser.id
+        })
+      });
+
+      nameInput.value = "";
+      trackingInput.value = "";
+
+      loadGroups();
+    });
+
+    loadGroups();
+  </script>
+
+</body>
+</html>
