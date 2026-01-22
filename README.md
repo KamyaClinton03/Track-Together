@@ -8,12 +8,17 @@ Things I want to do:
 -	Make groups and write what you want to track.
 -	I invite want a user to be able to make an account (username & password) then make a group or receive an to join a group and the link to join can be sent through text or email by the person within the group and they only see the groups they are invited to or created. 
 -	Start making things work and do stuff
--	Make it to where the users get badges based on their progress. 
--	Make a leaderboard within the group. 
--	Add a graph to show the groups progress 
--	Say something like group total or something 
+Modules
+-	Make it to where the users get badges based on their progress. (counting)
+-	Make a leaderboard within the group.
+-	pie graph
+-	Add a bar graph to show the groups progress 
+-	Say something like group total or something
+-	calender (monthly/weekly/daily)
+-	Trend graph
+UI
 -	Add amination within user interface so that then the user makes progress it shows something (kind of like then you complete an assignment in canvas) 
--	Make a chat or a comment section so that members of the group can chat with each other and motivate each other 
+-	Make a chat or a comment section so that members of the group can chat with each other and motivate each other (compatible with all the modules, all modules share same class/structure to allow this)
 -	Make it an official website
 -	Check to make sure all features work 
 
