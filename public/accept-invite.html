@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Accept Invite</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 60px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+    }
+
+    button {
+      padding: 8px 14px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>Join Group</h2>
+<p>Enter a username and password to join this group.</p>
+
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="acceptInvite()">Join Group</button>
+
+<script>
+const API_BASE = "http://localhost:3000";
+const params = new URLSearchParams(window.location.search);
+const code = params.get("code");
+
+async function acceptInvite() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!username || !password) {
+    alert("Enter both username and password");
+    return;
+  }
+
+  // Try login first
+  let loginRes = await fetch(`${API_BASE}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  let userData;
+
+  if (loginRes.status === 200) {
+    userData = await loginRes.json();
+  } else {
+    // If login fails, create a new account
+    let signupRes = await fetch(`${API_BASE}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    userData = await signupRes.json();
+  }
+
+  const userId = userData.user.id;
+
+  // Accept the invite
+  const res = await fetch(`${API_BASE}/accept-invite`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, userId })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+}
+</script>
+
+</body>
+</html>

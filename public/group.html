@@ -1,78 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Group Details</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 40px auto;
-    }
-    .member {
-      padding: 6px 0;
-      border-bottom: 1px solid #ddd;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Group Progress</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 750px;
+    margin: 40px auto;
+  }
+
+  #addMemberBtn { 
+    position: absolute; 
+    top: 10px; 
+    right: 10px; 
+    padding: 8px 14px; 
+    font-size: 14px; 
+  }
+  #invitePopup { 
+    display:none; 
+    position: fixed; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    background: white; 
+    padding: 20px; 
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+    width: 300px;
+  }
+
+  h2 {
+    margin-top: 40px;
+  }
+
+  .member {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .progress-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bar {
+    background: #e0e0e0;
+    height: 14px;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+
+  .fill {
+    background: #4caf50;
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 120px 90px 40px 40px 90px 80px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  input {
+    width: 80px;
+  }
+
+  button {
+    padding: 4px 8px;
+  }
+
+  .header {
+    font-weight: bold;
+  }
+</style>
 </head>
+
 <body>
 
-  <h1 id="group-title">Loading group...</h1>
-  <p id="tracking"></p>
+<button id="addMemberBtn">Add Member</button>
 
-  <h2>Members</h2>
-  <div id="members-list">Loading members...</div>
+<h1 id="group-title">Loading group...</h1>
 
-  <script>
-    const API_BASE = "http://localhost:3000";
+<h2>Group Progress</h2>
+<div id="progress-bars"></div>
 
-    // Get groupId from URL
-    const params = new URLSearchParams(window.location.search);
-    const groupId = params.get("groupId");
+<h2>Member Controls</h2>
+<div class="member controls header">
+  <span>Member</span>
+  <span>Increment</span>
+  <span></span>
+  <span></span>
+  <span>Goal</span>
+  <span>Progress</span>
+</div>
+<div id="member-controls"></div>
 
-    async function loadGroup() {
-      const res = await fetch(API_BASE + "/groups");
-      const groups = await res.json();
+<div id="invitePopup">
+  <h3>Add Member</h3> 
 
-      const group = groups.find(g => g.id == groupId);
+  <h4>Add by Username</h4>
+  <input id="addByName" type="text" placeholder="Enter username" style="width: 100%;"> 
+  <button onclick="addMemberByName()">Add</button>
+  
+  <hr>
 
-      if (!group) {
-        document.getElementById("group-title").textContent = "Group not found";
-        return;
-      }
+  <h4>Invite by Email</h4>
+  <input id="inviteEmail" type="email" placeholder="Enter email" style="width: 100%;"> 
+  <button onclick="sendInvite()">Send Invite</button>
 
-      // Show group name and tracking type
-      document.getElementById("group-title").textContent = group.name;
-      document.getElementById("tracking").textContent = "Tracking: " + group.tracking;
+  <br><br> 
+  <button onclick="closeInvite()">Cancel</button> 
+</div>
+<script>
+const API_BASE = "http://localhost:3000";
+const params = new URLSearchParams(window.location.search);
+const groupId = params.get("groupId");
 
-      // Load members
-      loadMembers(group.members);
-    }
+let users = [];
+let group = null;
 
-    async function loadMembers(memberIds) {
-      const res = await fetch(API_BASE + "/users");
-      const users = await res.json();
+document.getElementById("addMemberBtn").onclick = () => { 
+  document.getElementById("invitePopup").style.display = "block"; 
+}; 
+function closeInvite() {
+   document.getElementById("invitePopup").style.display = "none"; 
+} 
+async function addMemberByName() { 
+  const username = document.getElementById("addByName").value.trim(); 
+  if (!username) return alert("Enter a username"); 
+  
+  const res = await fetch(`${API_BASE}/add-member`, {
+     method: "POST", 
+     headers: { "Content-Type": "application/json" }, 
+     body: JSON.stringify({ username, groupId }) 
+    }); 
+    
+    const data = await res.json();
+     alert(data.message); 
+     
+     if (data.success) { 
+      closeInvite(); 
+      loadData(); 
+  } 
+}
 
-      const membersList = document.getElementById("members-list");
-      membersList.innerHTML = "";
+async function sendInvite() { 
+  const email = document.getElementById("inviteEmail").value.trim(); 
+  if (!email) return alert("Enter an email"); 
+  
+  const res = await fetch(`${API_BASE}/invite`, { 
+    method: "POST", 
+    headers: { "Content-Type": "application/json" }, 
+    body: JSON.stringify({ email, groupId }) 
+  }); 
+  const data = await res.json(); 
+  alert("Invite created! Share this link:\n" + data.inviteLink); 
+  closeInvite(); 
+}
 
-      const members = users.filter(u => memberIds.includes(u.id));
+async function loadData() {
+  const gRes = await fetch(API_BASE + "/groups");
+  const uRes = await fetch(API_BASE + "/users");
 
-      if (members.length === 0) {
-        membersList.textContent = "No members yet.";
-        return;
-      }
+  const groups = await gRes.json();
+  users = (await uRes.json()).map(u => ({
+    ...u,
+    progress: Number(u.progress),
+    goal: Number(u.goal)
+  }));
 
-      members.forEach(user => {
-        const div = document.createElement("div");
-        div.className = "member";
-        div.textContent = user.username;
-        membersList.appendChild(div);
-      });
-    }
+  group = groups.find(g => g.id == Number(groupId));
+  if (!group) {
+    document.getElementById("group-title").textContent = "Group not found";
+    return;
+  }
 
-    loadGroup();
-  </script>
+  document.getElementById("group-title").textContent = group.name;
 
+  const members = users.filter(u => group.members.includes(u.id));
+
+  renderProgress(members);
+  renderControls(members);
+}
+
+function renderProgress(members) {
+  const el = document.getElementById("progress-bars");
+  el.innerHTML = "";
+
+  members.forEach(u => {
+    const progress = Number(u.progress) || 0;
+    const goal = Number(u.goal) || 100;
+    const percent = Math.min(Math.round((progress / goal) * 100), 100);
+
+    el.innerHTML += `
+      <div class="member progress-row">
+        <strong>${u.username} — ${percent}%</strong>
+        <div class="bar">
+          <div class="fill" style="width:${percent}%"></div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderControls(members) {
+  const el = document.getElementById("member-controls");
+  el.innerHTML = "";
+
+  members.forEach(u => {
+    const progress = Number(u.progress) || 0;
+    const goal = Number(u.goal) || 100;
+    const percent = Math.min(Math.round((progress / goal) * 100), 100);
+
+    el.innerHTML += `
+      <div class="member controls">
+        <strong>${u.username}</strong>
+
+        <input type="number" id="inc-${u.id}" value="5">
+     
+        <button onclick="changeProgress(${u.id}, 1)">+</button>
+        <button onclick="changeProgress(${u.id}, -1)">−</button>
+
+        <input type="number"
+               value="${goal}"
+               onchange="updateGoal(${u.id}, this.value)">
+
+        <span>${percent}%</span>
+      </div>
+    `;
+  });
+}
+
+/* ===== ACTIONS ===== */
+
+async function changeProgress(id, dir) {
+  const user = users.find(u => u.id === id);
+  const inc = Number(document.getElementById("inc-" + id).value) || 0;
+
+  user.progress = Math.max(0, user.progress + inc * dir);
+  await saveUser(user);
+}
+
+async function updateGoal(id, goal) {
+  const user = users.find(u => u.id === id);
+  user.goal = Math.max(1, Number(goal));
+  await saveUser(user);
+}
+
+async function saveUser(user) {
+  await fetch(API_BASE + "/users/" + user.id, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      progress: user.progress,
+      goal: user.goal
+    })
+  });
+
+  loadData();
+}
+
+
+
+loadData();
+</script>
 </body>
 </html>
