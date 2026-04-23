@@ -213,5 +213,8 @@ app.get("/activity", (req, res) => {
   if (gId) return res.json(activityLogs.filter(l => l.groupId === gId).slice(0, 20));
   res.json(activityLogs.slice(0, 20));
 });
+const PORT = process.env.PORT || 3000;
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server is running on port ${PORT}`);
+});
