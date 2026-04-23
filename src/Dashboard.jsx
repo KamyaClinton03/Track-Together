@@ -12,7 +12,7 @@ function Dashboard({ user, onLogout }) {
   const [groupGoal, setGroupGoal] = useState(100);
 
   const loadGroups = () => {
-    fetch("http://localhost:3000/groups")
+    fetch("https://track-together-684394624513.us-central1.run.app/groups")
       .then(res => res.json())
       .then(data => setGroups(data))
       .catch(err => console.error("Error loading groups:", err));
@@ -26,7 +26,7 @@ function Dashboard({ user, onLogout }) {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    const res = await fetch("http://localhost:3000/groups", {
+    const res = await fetch("https://track-together-684394624513.us-central1.run.app/groups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -45,7 +45,7 @@ function Dashboard({ user, onLogout }) {
     if (!joinCode.trim()) return;
 
     try {
-      const res = await fetch("http://localhost:3000/join-group", {
+      const res = await fetch("https://track-together-684394624513.us-central1.run.app/join-group", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inviteCode: joinCode, userId: user.id })

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './auth.css'; 
 
 function login({ onLoginSuccess }) { 
-  const API_BASE = "http://localhost:3000";
+  const API_BASE = "https://track-together-684394624513.us-central1.run.app";
 
   const [isLoginView, setIsLoginView] = useState(true);
   const [username, setUsername] = useState("");

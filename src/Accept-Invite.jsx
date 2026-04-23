@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './accept-invite.css';
 
 function AcceptInvite(AcceptInviteComponent) {
-  const API_BASE = "http://localhost:3000";
+  const API_BASE = "https://track-together-684394624513.us-central1.run.app";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");

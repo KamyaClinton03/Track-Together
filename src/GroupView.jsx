@@ -63,9 +63,9 @@ function GroupView({ groupId, userId, onBack }) {
   const loadData = async () => {
     try {
       const [gRes, uRes, aRes] = await Promise.all([
-        fetch("http://localhost:3000/groups"),
-        fetch("http://localhost:3000/users"),
-        fetch(`http://localhost:3000/activity?groupId=${groupId}`)
+        fetch("https://track-together-684394624513.us-central1.run.app/groups"),
+        fetch("https://track-together-684394624513.us-central1.run.app/users"),
+        fetch(`https://track-together-684394624513.us-central1.run.app/activity?groupId=${groupId}`)
       ]);
       const allGroups = await gRes.json();
       const allUsers = await uRes.json();
@@ -93,7 +93,7 @@ function GroupView({ groupId, userId, onBack }) {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await fetch("http://localhost:3000/api/current_user");
+      const res = await fetch("https://track-together-684394624513.us-central1.run.app/api/current_user");
       const data = await res.json();
       if (data) setCurrentUser(data);
     };
@@ -109,7 +109,7 @@ function GroupView({ groupId, userId, onBack }) {
     const targetId = currentUser?.id || userId;
 
     try {
-      await fetch(`http://localhost:3000/users/${userId}`, {
+      await fetch(`https://track-together-684394624513.us-central1.run.app/users/${userId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -130,7 +130,7 @@ function GroupView({ groupId, userId, onBack }) {
     const me = members.find(m => m.id === Number(userId));
     const displayName = currentUser?.displayName || me?.username || "User";
     try {
-      await fetch("http://localhost:3000/chat", {
+      await fetch("https://track-together-684394624513.us-central1.run.app/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +148,7 @@ function GroupView({ groupId, userId, onBack }) {
 
   const handleLeave = async () => {
     if (window.confirm("Are you sure you want to leave this group?")) {
-      await fetch("http://localhost:3000/leave-group", {
+      await fetch("https://track-together-684394624513.us-central1.run.app/leave-group", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ groupId, userId })
@@ -159,7 +159,7 @@ function GroupView({ groupId, userId, onBack }) {
 
   const handleDelete = async () => {
     if (window.confirm("DANGER: This will delete the group for everyone. Proceed?")) {
-      await fetch(`http://localhost:3000/groups/${groupId}`, {
+      await fetch(`https://track-together-684394624513.us-central1.run.app/groups/${groupId}`, {
         method: "DELETE"
       });
       onBack();
@@ -168,7 +168,7 @@ function GroupView({ groupId, userId, onBack }) {
 
   const handleAddMember = async () => {
     if (!addByName.trim()) return;
-    await fetch("http://localhost:3000/add-member", {
+    await fetch("https://track-together-684394624513.us-central1.run.app/add-member", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username: addByName, groupId: Number(groupId) })
@@ -181,7 +181,7 @@ function GroupView({ groupId, userId, onBack }) {
   const handleReset = async () => {
     if (window.confirm("Reset everyone's progress to 0% and clear the log?")) {
       try {
-        await fetch("http://localhost:3000/reset-group", {
+        await fetch("https://track-together-684394624513.us-central1.run.app/reset-group", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ groupId: Number(groupId) })
