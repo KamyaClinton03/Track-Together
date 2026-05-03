@@ -8,6 +8,7 @@ function login({ onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState({ message: "", isError: false });
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,6 +35,17 @@ function login({ onLoginSuccess }) {
     } catch (err) {
       setStatus({ message: "Error connecting to server", isError: true });
     }
+  };
+
+  const handleForgot = async (e) => {
+    e.preventDefault();
+    const res = await fetch(`${API_BASE}/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username })
+    });
+    const data = await res.json();
+    setStatus({ message: data.message, isError: !res.ok });
   };
 
   return (

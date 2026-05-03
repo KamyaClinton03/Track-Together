@@ -8,13 +8,18 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUser(userData); 
   }
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("userToken");
+    window.location.href = "/";
+  }
   
 
   return (
     <div>
       {}
       {user ? (
-        <Dashboard user={user} />
+        <Dashboard user={user} onLogout={handleLogout} />
       ) : (
         <Auth onLoginSuccess={handleLoginSuccess} />
       )}

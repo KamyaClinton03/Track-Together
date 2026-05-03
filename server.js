@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +15,41 @@ app.use(express.json());
 let users = [];
 let groups = [];
 let activityLogs = [];
+
+// Email transporter setup 
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'kamya.clinton@vikings.berry.edu',
+    pass: 'raouvwawcgdpjntk'
+  }
+});
+// Forgot password route 
+app.post('/forgot-password', async (req, res) => {
+  const { username } = req.body;
+
+  const user = users.find(u => u.username === username);
+
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  // Create a random token that expires in 1 hour
+  const token = crypto.randomBytes(20).toString('hex');
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = Date.now() + 3600000; 
+
+  const resetUrl = `https://track-together.kamya-clinton.workers.dev/reset/${token}`;
+
+  const mailOptions = {
+    to: user.email || 'kamya.clinton@vikings.berry.edu', // Fallback email
+    subject: 'Password Reset Request',
+    text: `Click here to reset your password: ${resetUrl}`
+  };
+
+  transporter.sendMail(mailOptions, (err) => {
+    if (err) return res.status(500).json({ message: "Error sending email" });
+    res.json({ message: "Reset email sent!" });
+  });
+});
 
 // Signup
 app.post("/signup", (req, res) => {
